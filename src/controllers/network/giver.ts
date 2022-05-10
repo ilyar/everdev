@@ -11,7 +11,7 @@ import {
 } from "@tonclient/core";
 import {
     KnownContract,
-    knownContractByName,
+    knownContractByType,
     knownContractFromAddress,
     KnownContracts,
 } from "../../core/known-contracts";
@@ -19,18 +19,10 @@ import { NetworkGiverInfo } from "./registry";
 import { SignerRegistry } from "../signer/registry";
 import { formatTokens } from "../../core/utils";
 
-async function giverV2Send(giver: Account, address: string, value: number): Promise<void> {
+async function giverSend(giver: Account, address: string, value: number): Promise<void> {
     await giver.run("sendTransaction", {
         "dest": address,
         "value": value,
-        "bounce": false,
-    });
-}
-
-async function giverV1Send(giver: Account, address: string, value: number): Promise<void> {
-    await giver.run("sendGrams", {
-        "dest": address,
-        "amount": value,
         "bounce": false,
     });
 }
@@ -84,7 +76,7 @@ export class NetworkGiver implements AccountGiver {
         const address = info.address !== ""
             ? info.address
             : (await client.abi.encode_message({
-                abi: abiContract(KnownContracts.GiverV2.abi),
+                abi: abiContract(KnownContracts.Giver.abi),
                 deploy_set: {
                     tvc: seGiverKeysTvc,
                 },
@@ -94,20 +86,14 @@ export class NetworkGiver implements AccountGiver {
         let send: (giver: Account, address: string, value: number) => Promise<void>;
 
         if (info.name !== undefined && info.name !== "auto") {
-            contract = await knownContractByName(info.name);
+            contract = await knownContractByType(info.name);
         } else {
             contract = await knownContractFromAddress(client, "Giver", address);
         }
 
-        if (contract === KnownContracts.GiverV1) {
-            send = giverV1Send;
-        } else if (contract === KnownContracts.GiverV2) {
-            send = giverV2Send;
-        } else if (contract === KnownContracts.GiverV3) {
-            send = giverV2Send;
-        } else if (contract === KnownContracts.SetcodeMultisigWallet) {
-            send = multisigSend;
-        } else if (contract === KnownContracts.SafeMultisigWallet) {
+        if (contract === KnownContracts.Giver) {
+            send = giverSend;
+        } else if (contract === KnownContracts.Multisig) {
             send = multisigSend;
         } else {
             throw new Error(`Contract ${contract.name} can't be used as a giver.`);

@@ -19,48 +19,34 @@ test("Add network giver by address", async () => {
         name: 'se',
         signer: 'alice',
     })
-    expect(new NetworkRegistry().get("se").giver?.name).toEqual("GiverV2");
+    expect(new NetworkRegistry().get("se").giver?.name).toEqual("Giver");
 });
 
 test("Add network giver by type", async () => {
     await runCommand(consoleTerminal, 'network giver', {
         name: 'se',
-        type: 'GiverV1',
+        type: 'Giver',
         signer: 'alice',
     })
-    expect(new NetworkRegistry().get("se").giver?.name).toEqual("GiverV1");
+    expect(new NetworkRegistry().get("se").giver?.name).toEqual("Giver");
 
     await runCommand(consoleTerminal, 'network giver', {
         name: 'se',
-        type: 'GiverV2',
+        type: 'Multisig',
         signer: 'alice',
     })
-    expect(new NetworkRegistry().get("se").giver?.name).toEqual("GiverV2");
-
-    await runCommand(consoleTerminal, 'network giver', {
-        name: 'se',
-        type: 'GiverV3',
-        signer: 'alice',
-    })
-    expect(new NetworkRegistry().get("se").giver?.name).toEqual("GiverV3");
-
-    await runCommand(consoleTerminal, 'network giver', {
-        name: 'se',
-        type: 'SafeMultisigWallet',
-        signer: 'alice',
-    })
-    expect(new NetworkRegistry().get("se").giver?.name).toEqual("SafeMultisigWallet");
+    expect(new NetworkRegistry().get("se").giver?.name).toEqual("Multisig");
 });
 
 test("Add network giver error", async () => {
     try {
         await runCommand(consoleTerminal, 'network giver', {
             name: 'se',
-            type: 'NotExist',
+            type: 'GiverV1',
             signer: 'alice',
         })
         expect(true).toBe(false);
     } catch (error: any) {
-        expect(error.message).toBe("Unknown contract type NotExist.");
+        expect(error.message).toBe("Unknown contract type GiverV1.");
     }
 });
